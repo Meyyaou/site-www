@@ -920,14 +920,16 @@ constructor and then stores them:
 <?code-excerpt "usage_bad.dart (calc-vs-store1)"?>
 ```dart tag=bad
 class Circle {
-  double radius;
-  double area;
-  double circumference;
-
+  
   Circle(double radius)
       : radius = radius,
         area = pi * radius * radius,
         circumference = pi * 2.0 * radius;
+
+  double radius;
+  double area;
+  double circumference;
+
 }
 ```
 
@@ -947,6 +949,10 @@ To correctly handle cache invalidation, we would need to do this:
 <?code-excerpt "usage_bad.dart (calc-vs-store2)"?>
 ```dart tag=bad
 class Circle {
+   Circle(this._radius) {
+    _recalculate();
+  }
+
   double _radius;
   double get radius => _radius;
   set radius(double value) {
@@ -959,11 +965,7 @@ class Circle {
 
   double _circumference = 0.0;
   double get circumference => _circumference;
-
-  Circle(this._radius) {
-    _recalculate();
-  }
-
+ 
   void _recalculate() {
     _area = pi * _radius * _radius;
     _circumference = pi * 2.0 * _radius;
@@ -977,9 +979,9 @@ first implementation should be:
 <?code-excerpt "usage_good.dart (calc-vs-store)"?>
 ```dart tag=good
 class Circle {
-  double radius;
-
   Circle(this.radius);
+
+  double radius;
 
   double get area => pi * radius * radius;
   double get circumference => pi * 2.0 * radius;
@@ -1156,9 +1158,10 @@ The other time to use `this.` is when redirecting to a named constructor:
 <?code-excerpt "usage_bad.dart (this-dot-constructor)"?>
 ```dart tag=bad
 class ShadeOfGray {
-  final int brightness;
+   
+   ShadeOfGray(int val) : brightness = val;
 
-  ShadeOfGray(int val) : brightness = val;
+  final int brightness;
 
   ShadeOfGray.black() : this(0);
 
@@ -1170,9 +1173,10 @@ class ShadeOfGray {
 <?code-excerpt "usage_good.dart (this-dot-constructor)"?>
 ```dart tag=good
 class ShadeOfGray {
-  final int brightness;
-
+  
   ShadeOfGray(int val) : brightness = val;
+
+  final int brightness;
 
   ShadeOfGray.black() : this(0);
 
@@ -1187,11 +1191,13 @@ lists:
 <?code-excerpt "usage_good.dart (param-dont-shadow-field-ctr-init)"?>
 ```dart tag=good
 class Box extends BaseBox {
-  Object? value;
-
+  
   Box(Object? value)
       : value = value,
         super(value);
+
+  Object? value;
+
 }
 ```
 
@@ -1208,10 +1214,11 @@ the class has multiple constructors.
 <?code-excerpt "usage_bad.dart (field-init-at-decl)"?>
 ```dart tag=bad
 class ProfileMark {
+  ProfileMark(this.name) : start = DateTime.now();
+
   final String name;
   final DateTime start;
 
-  ProfileMark(this.name) : start = DateTime.now();
   ProfileMark.unnamed()
       : name = '',
         start = DateTime.now();
@@ -1221,10 +1228,12 @@ class ProfileMark {
 <?code-excerpt "usage_good.dart (field-init-at-decl)"?>
 ```dart tag=good
 class ProfileMark {
+  
+  ProfileMark(this.name);
+
   final String name;
   final DateTime start = DateTime.now();
 
-  ProfileMark(this.name);
   ProfileMark.unnamed() : name = '';
 }
 ```
@@ -1250,10 +1259,12 @@ Many fields are initialized directly from a constructor parameter, like:
 <?code-excerpt "usage_bad.dart (field-init-as-param)"?>
 ```dart tag=bad
 class Point {
-  double x, y;
   Point(double x, double y)
       : x = x,
         y = y;
+
+  double x, y;
+
 }
 ```
 
@@ -1262,8 +1273,9 @@ We've got to type `x` _four_ times here to define a field. We can do better:
 <?code-excerpt "usage_good.dart (field-init-as-param)"?>
 ```dart tag=good
 class Point {
-  double x, y;
   Point(this.x, this.y);
+
+  double x, y;
 }
 ```
 
@@ -1323,16 +1335,16 @@ semicolon. (In fact, it's required for const constructors.)
 <?code-excerpt "usage_good.dart (semicolon-for-empty-body)"?>
 ```dart tag=good
 class Point {
-  double x, y;
   Point(this.x, this.y);
+  double x, y;
 }
 ```
 
 <?code-excerpt "usage_bad.dart (semicolon-for-empty-body)"?>
 ```dart tag=bad
 class Point {
-  double x, y;
   Point(this.x, this.y) {}
+  double x, y;
 }
 ```
 
